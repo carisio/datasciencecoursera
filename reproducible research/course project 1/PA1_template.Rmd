@@ -2,6 +2,7 @@
 title: "Program assignment 1"
 author: "Leandro Carísio Fernandes"
 output: html_document
+keep_md: true
 ---
 
 ```{r setup, include=FALSE}
