@@ -283,6 +283,8 @@ So, first let's copy the `original_data` to a new variable (`data`) and work wit
 
 To deal with the **NAs**, I will group the data by interval using the `dplyr` library. Then, we can summarise it by mean, removing the **NAs**.
 
+Note: to work properly, we need to detach the `plyr` library (see [here](https://stackoverflow.com/questions/26923862/why-are-my-dplyr-group-by-summarize-not-working-properly-name-collision-with)).
+
 The last step is to iterate over the dataset and, for each observation equals to **NA**, replace it by the mean calculated with `dplyr` library:
 
 
@@ -290,17 +292,14 @@ The last step is to iterate over the dataset and, for each observation equals to
 data <- original_data
 na_rows <- is.na(data$steps)
 
+if("plyr" %in% (.packages())){
+  detach("package:plyr", unload=TRUE) 
+}
 library(dplyr)
 df <- data.frame(data)
 df_grouped_by_interval <- group_by(df, interval) %>% summarise(mean(steps, na.rm = T))
 colnames(df_grouped_by_interval) <- c("interval", "steps_per_interval")
-```
 
-```
-## Error in names(x) <- value: 'names' attribute [2] must be the same length as the vector [1]
-```
-
-```r
 for (idx in 1:nrow(data)) {
     if (na_rows[idx]) {
         # data[idx, 1] is NA. Get the value of the interval (data[idx, 3])
@@ -311,10 +310,6 @@ for (idx in 1:nrow(data)) {
         data[idx, 1] <- df_grouped_by_interval$steps_per_interval[idx_interval]
     }
 }
-```
-
-```
-## Error in x[[jj]][iseq] <- vjj: replacement has length zero
 ```
 
 ### 4.3 Create a new dataset that is equal to the original dataset but with the missing data filled in.
@@ -345,7 +340,7 @@ mean(steps_per_day)
 ```
 
 ```
-## [1] NA
+## [1] 10766.19
 ```
 
 ```r
@@ -353,8 +348,7 @@ median(steps_per_day)
 ```
 
 ```
-## <NA> 
-##   NA
+## [1] 10766.19
 ```
 
 In this case, considering the way I deal with the **NAs**, the mean remains the same and the median changed (now it is equal the mean).

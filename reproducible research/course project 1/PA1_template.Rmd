@@ -148,12 +148,17 @@ So, first let's copy the `original_data` to a new variable (`data`) and work wit
 
 To deal with the **NAs**, I will group the data by interval using the `dplyr` library. Then, we can summarise it by mean, removing the **NAs**.
 
+Note: to work properly, we need to detach the `plyr` library (see [here](https://stackoverflow.com/questions/26923862/why-are-my-dplyr-group-by-summarize-not-working-properly-name-collision-with)).
+
 The last step is to iterate over the dataset and, for each observation equals to **NA**, replace it by the mean calculated with `dplyr` library:
 
 ```{r}
 data <- original_data
 na_rows <- is.na(data$steps)
 
+if("plyr" %in% (.packages())){
+  detach("package:plyr", unload=TRUE) 
+}
 library(dplyr)
 df <- data.frame(data)
 df_grouped_by_interval <- group_by(df, interval) %>% summarise(mean(steps, na.rm = T))
