@@ -1,0 +1,157 @@
+#Event most harmful with respect to population health and event with the greatest economic consequences
+Leandro Carísio Fernandes
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Synopsis
+
+Severe weather events can be harmful with respect to population health and can have economic consequences. In this report, we found out which events impact most considering these two aspects (health and economic).
+
+Using the NOAA Storm Database, we checked the number of fatalites, injuries and the total damage caused by the events available in the database.
+
+The event with more fatalities associated with is the TORNADO, followed by EXCESSIVE HEAT, FLASH FLOOD, HEAD, and LIGHTNING.
+
+The event with more injuries associated with is the TORNADO, followed by TSTM WIND, FLOOD, EXCESSIVE HEAT, and LIGHTNING
+
+The event with the greatest economic consequences is FLOOD, followed by HURRICANY/TYPHOON, TORNADO, STORM SURGE, and HAIL.
+
+## Data Processing
+
+First we download the data to the workspace directory and open it using `read.csv` function. The download is done only if the file does not exists. The `read.csv` function read the data in the zipped file. Since it can take some time, the following code is cached, so it is only readed once. So, from now on, we will not update the variable `original_data`.
+
+```{r load_data_chunck, cache=TRUE}
+# Check if file exists in the working directory
+local_file <- "StormData.csv.bz2"
+fileURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+
+if(!file.exists(local_file)){
+    download.file(fileURL, local_file, method="curl")
+}
+
+original_data <- read.csv(bzfile(local_file), sep=",", header=T)
+```
+
+We can check the structure of `original_data`:
+
+```{r str_original_data}
+str(original_data)
+```
+
+As we can observe, there are some variables that will help us in this analysis:
+
+1. EVTYPE - Type of the event
+2. FATALITIES and INJURIES - Number of fatalities and injuries
+3. PROPDMG and CROPDMG - Property and crop damage
+4. PROPDMGEXP and CROPDMGEXP - Alphabetical characters used to signify magnitude ("H" for hundreds, "K" for thousands, "M" for millions, and "B" for billions)
+
+Let's create a new table with only those variables. To make it easier to analyse the total damage, we will consider the total damage as the sum of property damage and crop damage. This operation can be cached:
+
+```{r subset_data_chunck, cache=TRUE}
+prop_dmg <- original_data[, "PROPDMG"] 
+prop_dmg <- prop_dmg * ((original_data[, "PROPDMGEXP"] == "H") * 1e2) +
+            prop_dmg * ((original_data[, "PROPDMGEXP"] == "K") * 1e3) +
+            prop_dmg * ((original_data[, "PROPDMGEXP"] == "M") * 1e6) +
+            prop_dmg * ((original_data[, "PROPDMGEXP"] == "B") * 1e9)
+
+crop_dmg <- original_data[, "CROPDMG"]
+crop_dmg <- crop_dmg * ((original_data[, "CROPDMGEXP"] == "H") * 1e2) +
+            crop_dmg * ((original_data[, "CROPDMGEXP"] == "K") * 1e3) +
+            crop_dmg * ((original_data[, "CROPDMGEXP"] == "M") * 1e6) +
+            crop_dmg * ((original_data[, "CROPDMGEXP"] == "B") * 1e9)
+
+# Get the total damage scalled to billion
+total_dmg <- (prop_dmg + crop_dmg)/1e9
+
+subset_original <- original_data[, c("EVTYPE", "FATALITIES", "INJURIES")]
+subset_original <- cbind(subset_original, TOTALDMG = total_dmg)
+
+```
+
+Is there any **NA** in this subset?
+
+```{r is_there_na} 
+sum(is.na(subset_original))
+```
+
+So, there are no **NA** in this subset.
+
+Finally, we intend to know about the effects of these events in the economics and in the population health. So, we need to sum the fatalities, injuries and the total damage for all the events. This can be achieved using the `aggregate` function:
+
+```{r aggregate_fat_inj_dmg}
+result <- aggregate(cbind(FATALITIES, INJURIES, TOTALDMG)~EVTYPE,
+                          data=subset_original, sum)
+```
+
+## Results
+
+Now we can use the variable `result` to find the events that impacts more in the population health and with the greatest economic consequences. So, let's sort the variable `result` in the 
+
+```{r}
+print(paste(
+    result[which.max(result$FATALITIES),"EVTYPE"],
+    "is the event that causes more fatalities (",
+    max(result$FATALITIES),
+    ") fatalities"))
+print(paste(
+    result[which.max(result$INJURIES),"EVTYPE"],
+    "is the event that causes more injuries (",
+    max(result$INJURIES),
+    ") injuries"))
+print(paste(
+    result[which.max(result$TOTALDMG),"EVTYPE"],
+    "is the event with the greatest economic consequences (",
+    max(result$TOTALDMG)/1e9,
+    "billion dollars )"))
+```
+
+We can also check the top 5 most important events in these aspects (population health and economic consequences).
+
+First, the top 5 events with more fatalities:
+
+```{r plot_fatalities}
+library(ggplot2)
+
+# Sort FATALITIES in decreasing order
+result <- result[with(result, order(-FATALITIES)), ]
+
+ggplot(result[1:5,], aes(x=reorder(EVTYPE, -FATALITIES), y=FATALITIES)) +
+	labs(x="Event", y="Fatalities") +
+	ggtitle("Top 5 events that causes more fatalities") +
+	theme(panel.background = element_blank(), 
+		panel.grid.major = element_line(colour="grey"),
+		axis.text.x = element_text(angle = 45, hjust = 1)) +
+	geom_bar(stat="identity", fill=rgb(56,146,208, maxColorValue = 255))
+```
+
+Second, let's see the top 5 events that cause more injuries:
+
+```{r plot_injuries}
+# Sort INJURIES in decreasing order
+result <- result[with(result, order(-INJURIES)), ]
+
+ggplot(result[1:5,], aes(x=reorder(EVTYPE, -INJURIES), y=INJURIES)) +
+	labs(x="Event", y="Injuries") +
+	ggtitle("Top 5 events that causes more injuries") +
+	theme(panel.background = element_blank(), 
+		panel.grid.major = element_line(colour="grey"),
+		axis.text.x = element_text(angle = 45, hjust = 1)) +
+	geom_bar(stat="identity", fill=rgb(56,146,208, maxColorValue = 255))
+```
+
+Finally, let's check the top 5 events with more economic consequences:
+
+```{r plot_damage}
+# Sort TOTALDMG in decreasing order
+result <- result[with(result, order(-TOTALDMG)), ]
+
+ggplot(result[1:5,], aes(x=reorder(EVTYPE, -TOTALDMG), y=TOTALDMG)) +
+	labs(x="Event", y="Total damage (billion dollars)") +
+	ggtitle("Top 5 events with more economic consequences") +
+	theme(panel.background = element_blank(), 
+		panel.grid.major = element_line(colour="grey"),
+		axis.text.x = element_text(angle = 45, hjust = 1)) +
+	geom_bar(stat="identity", fill=rgb(56,146,208, maxColorValue = 255))
+
+```
