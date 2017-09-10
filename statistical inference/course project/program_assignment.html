@@ -248,25 +248,20 @@ sprintf(&quot;The theoretical mean of the distribution is %.2f&quot;, (1/lambda)
 
 <h3>Task 2: Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.</h3>
 
-<p>So, the theoretical standard deviation of exponencial distribution is 1/lambda (5.0) and the theoretical variance is (1/lambda)<sup>2</sup> (25.0).</p>
+<p>So, the theoretical standard deviation of a population following a exponencial distribution is 1/lambda (5.0) and the theoretical variance is (1/lambda)<sup>2</sup> (25.0).</p>
 
-<p>The simulated variance should be equal to the theoretical variance divided by n_avg (25/40 = 0.625). The code below prints the simulated variance and compares it to the theoretical one of the distribution of the means. They are approximatly equal to each other.</p>
-
-<pre><code class="r">sprintf(&quot;The theoretical variance of the exponencial distribution is %.3f&quot;, (1/lambda)^2)
-</code></pre>
-
-<pre><code>## [1] &quot;The theoretical variance of the exponencial distribution is 25.000&quot;
-</code></pre>
+<p>The simulated variance of a distribution of averages is equal to the variance of the population divided by n_avg (25/40 = 0.625). The code below prints the simulated variance and compares it to the theoretical one of the distribution of the means. They are approximatly equal to each other.</p>
 
 <pre><code class="r">sprintf(paste(&quot;The simulated variance should be equal to %.3f, i.e., 1/%.3f th&quot;,
-              &quot;of the theoretical variance. Actually, the simulated variance is&quot;,
+              &quot;of the theoretical variance of the population.&quot;,
+              &quot;Actually, the simulated variance is&quot;,
               &quot;%.3f, which is very close to the theoretical value&quot;), 
         (1/lambda)^2/n_avg,
         n_avg,
         var(mns))
 </code></pre>
 
-<pre><code>## [1] &quot;The simulated variance should be equal to 0.625, i.e., 1/40.000 th of the theoretical variance. Actually, the simulated variance is 0.627, which is very close to the theoretical value&quot;
+<pre><code>## [1] &quot;The simulated variance should be equal to 0.625, i.e., 1/40.000 th of the theoretical variance of the population. Actually, the simulated variance is 0.627, which is very close to the theoretical value&quot;
 </code></pre>
 
 <p>Note: The figure in task 3 shows the theoretical and simulated variance of the data.</p>
