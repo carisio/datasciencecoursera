@@ -125,7 +125,7 @@ $(document).ready(function () {
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>In this course project, we should deal with the Weight Lifting Exercise Dataset [1]. Our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants, who were asked to perform barbell lifts correctly and incorrectly in 5 different ways. The database consists of a training set and a testing set. After using the training set, we should predict the classes of 20 observations of the testing dataset.</p>
-<p>My approach to solve this problem was to split the training dataset into two datasets: one where the training is applyed (70% of the dataset), and another for validation (and to extract the expected error). Then, I cleaned the data (removing NAs and variables with high correlation). Finally, I used the randomForest algorithm to build the model. Since the final accuracy was greater than 99%, I considered that the random forest solve the problem.</p>
+<p>My approach to solve this problem was to split the training dataset into two datasets: one where the training is applyed (70% of the dataset), and another for validation (and to extract the expected out-of-sample error). Then, I cleaned the data (removing NAs and variables with high correlation). Finally, I used the randomForest algorithm to build the model. Since the final accuracy was greater than 99% (expected out-of-sample error of ~1%), I considered that the random forest solve the problem.</p>
 </div>
 <div id="pre-processing" class="section level2">
 <h2>Pre-processing</h2>
@@ -156,7 +156,7 @@ training &lt;- training[, !grepl('_yaw_forearm', names(training))]</code></pre>
 </div>
 <div id="preparing-data-to-build-the-model" class="section level3">
 <h3>Preparing Data to Build the Model</h3>
-<p>We can only work with the training dataset. So, I will split it in two dataset: tr, used to train, and validation, for validation purpose. The validation dataset will be used to find expected error when applying the model in the testing dataset.</p>
+<p>We can only work with the training dataset. So, I will split it in two dataset: tr, used to train, and validation, for validation purpose. The validation dataset will be used to find the expected out-of-sample error when applying the model in the testing dataset.</p>
 <pre class="r"><code>set.seed(12345)
 inTrain &lt;- createDataPartition(y=training$classe, p=0.7, list=F)
 tr &lt;- training[inTrain, ]
@@ -216,7 +216,7 @@ CM$table</code></pre>
 <pre><code>## [1] &quot;Accuracy (%):  100&quot;</code></pre>
 <pre class="r"><code># The accuracy can also be calculated using:
 # sum(predict(model, tr) == tr$classe)/length(predict(model, tr))</code></pre>
-<p>To check what will be the expected error in some testing data, we need to check our model using the validation database:</p>
+<p>To check what will be the expected out-of-sample error in some testing data, we need to check our model using the validation database:</p>
 <pre class="r"><code>CM &lt;- confusionMatrix(predict(model, validation), validation$classe)
 CM$table</code></pre>
 <pre><code>##           Reference
@@ -232,7 +232,7 @@ CM$table</code></pre>
 <pre><code>## [1] &quot;Confidence interval (%): ( 98.7469117981355 ,  99.2656168099831 )&quot;</code></pre>
 <pre class="r"><code># The accuracy can also be calculated using:
 # sum(predict(model, validation) == validation$classe)/length(predict(model, validation))</code></pre>
-<p>As we can observe, the accuray is &gt;99%. For the purpose of this project, this value is satisfatory. So, it is not necessary to consider other approaches.</p>
+<p>As we can observe, the accuray is &gt;99%, which means that the expected out-of-sample error is about 1%. For the purpose of this project, this value is satisfatory. So, it is not necessary to consider other approaches.</p>
 </div>
 <div id="predicting-the-test-dataset" class="section level2">
 <h2>Predicting the test dataset</h2>

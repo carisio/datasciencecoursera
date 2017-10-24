@@ -12,7 +12,7 @@ Leandro Carisio Fernandes
 
 In this course project, we should deal with the Weight Lifting Exercise Dataset [1]. Our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants, who were asked to perform barbell lifts correctly and incorrectly in 5 different ways. The database consists of a training set and a testing set. After using the training set, we should predict the classes of 20 observations of the testing dataset.
 
-My approach to solve this problem was to split the training dataset into two datasets: one where the training is applyed (70% of the dataset), and another for validation (and to extract the expected error). Then, I cleaned the data (removing NAs and variables with high correlation). Finally, I used the randomForest algorithm to build the model. Since the final accuracy was greater than 99%, I considered that the random forest solve the problem.
+My approach to solve this problem was to split the training dataset into two datasets: one where the training is applyed (70% of the dataset), and another for validation (and to extract the expected out-of-sample error). Then, I cleaned the data (removing NAs and variables with high correlation). Finally, I used the randomForest algorithm to build the model. Since the final accuracy was greater than 99% (expected out-of-sample error of ~1%), I considered that the random forest solve the problem.
 
 ## Pre-processing
 
@@ -64,7 +64,7 @@ dim(training)
 
 ### Preparing Data to Build the Model
 
-We can only work with the training dataset. So, I will split it in two dataset: tr, used to train, and validation, for validation purpose. The validation dataset will be used to find expected error when applying the model in the testing dataset.
+We can only work with the training dataset. So, I will split it in two dataset: tr, used to train, and validation, for validation purpose. The validation dataset will be used to find the expected out-of-sample error when applying the model in the testing dataset.
 
 ```{r separating_tr_validation}
 set.seed(12345)
@@ -115,7 +115,7 @@ print(paste('Accuracy (%): ', 100*CM$overall['Accuracy']))
 # sum(predict(model, tr) == tr$classe)/length(predict(model, tr))
 ```
 
-To check what will be the expected error in some testing data, we need to check our model using the validation database:
+To check what will be the expected out-of-sample error in some testing data, we need to check our model using the validation database:
 
 ```{r validation_results}
 CM <- confusionMatrix(predict(model, validation), validation$classe)
@@ -126,7 +126,7 @@ print(paste('Confidence interval (%): (', 100*CM$overall['AccuracyLower'], ', ',
 # sum(predict(model, validation) == validation$classe)/length(predict(model, validation))
 ```
 
-As we can observe, the accuray is >99%. For the purpose of this project, this value is satisfatory. So, it is not necessary to consider other approaches.
+As we can observe, the accuray is >99%, which means that the expected out-of-sample error is about 1%. For the purpose of this project, this value is satisfatory. So, it is not necessary to consider other approaches.
 
 ## Predicting the test dataset
 
